@@ -1,0 +1,325 @@
+import os
+import random
+
+VALID_CHOICES = ['Y', 'N', 'y', 'n']
+INVENTORY = []
+
+# rooms variable to define each room with description, connection with other rooms and items to be found in that room
+rooms = {
+    'FLOYER': {
+        'type': 'Floyer',
+        'description': 'Holloween night. The spookiest of nights. And you happen to be trapped in the foyer of a haunted mansion, the front door locked you can go either north or east. You must escape!',
+        'exits': {'north': 'DINNING_ROOM', 'east': 'BASEMENT', 'west': 'LIVING_ROOM'},
+        'item': 'entrynote'
+        },
+    'BASEMENT': {
+        'type': 'Staircase/basement',
+        'description': '\nThe bottom of a flight of rickety wooden stairs. Only way to go is to go west?',
+        'exits': {'west': 'FLOYER'},
+        'item': 'sword'
+        },
+    'LIVING_ROOM': {
+        'type': 'Living Room',
+        'description': '\nA living room with a cold fireplace, a moth-eaten chair, and an old teddy bear that seems to have had its insides violently removed.\nYou can either move to south or east.',
+        'exits': {'south': 'FLOYER','east': 'DINNING_ROOM'},
+        'item': 'sheild'},
+    'DINNING_ROOM': {
+        'type': 'Dinning Room',
+        'description': '\nA dining room with a large table, covered in rotten food, and with only two lonely chairs. Smells nasty. Only way to go is to go east',
+        'exits': {'east': 'KITCHEN'},
+        'item': 'woodensword'
+        },
+    'KITCHEN': {
+        'type': 'Kitchen',
+        'description': '\nA kitchen with knives and rot strewn about. If the dining room smelled bad, this is ten times worse.You can go west or south doors',
+        'exits': {'west': 'BACKYARD', 'south': 'DINNING_ROOM'},
+        'item': 'note',
+        },
+    'BACKYARD': {
+        'type': 'Backyard',
+        'description': '\nFinally! Fresh air! There\'s a wilted garden here... And some graves.\nThankfully, you escaped the haunted house.',
+        'exits': {},
+    }
+}
+
+
+
+def print_shield():
+    print("                 ..:=++*##*++=:..                 ")
+    print("          ..:=++*#%%%%@%**%@%%%%#*++=:...         ")
+    print("  ...:=++*#%%%%@%#+=-..    ..-=+#%@%%%%#*++=:...  ")
+    print("+**#%%%%%%#*+-:..                 .:-=*#%@%%%%#**+")
+    print("@@+@@*=:..                              ..:-+@@+@@")
+    print("%@+@@-                                      .@@+@%")
+    print("+@+@@=                                      -@@+@*")
+    print(":@%*@#.                                    .*@##@-")
+    print(" *@+@@:                                    .@@+@#.")
+    print(" .%@+@%.                                  .#@*%@: ")
+    print(" .:@##@*.                                .+@##@-  ")
+    print("  .:@##@*.                              .+@%*@-.  ")
+    print("    :%#*@#..                           .*@##%:    ")
+    print("     .*%*@@=.                        .-%@*%*.     ")
+    print("      .:%##@%-.                    .:#@#*%-.      ")
+    print("        .-###@#-.                .-#@%#%=.        ")
+    print("          .-###@%+:.          ..+%@###=.          ")
+    print("            .:+*#%@%+:.    .:+#@%##*-.            ")
+    print("               .-+*#%@@#+=*@@%##+-.               ")
+    print("                  .:=+#%%%%#++-.                  ")
+    print("                       *%%*")
+
+
+def print_magic_sword():
+    print("\t                                         ..::::-+*")
+    print("\t                                    .:-----::-==-+")
+    print("\t                                  .:==:::::-==--+-")
+    print("\t                                .:==:::::==-----*.")
+    print("\t                              .:=-::::-==-----==-.")
+    print("\t                            .:=-::::-==-----+=:.  ")
+    print("\t                          .:=-::::-==----=+=.     ")
+    print("\t                        .:=-::::===----++-.       ")
+    print("\t                      .:--:::-==----=+=..         ")
+    print("\t                    .:-::::-==----++-.            ")
+    print("\t      ...         .:-::::-==---=+=:.              ")
+    print("\t    :-==*-.     .:-::::==----=+-.                 ")
+    print("\t    -++*#*+=---==:::-==---=+=:.                   ")
+    print("\t        .-+*+==-===+=---=+=..                     ")
+    print("\t           .=##*+==-=++=:.                        ")
+    print("\t           .+##%%#**+==+=:.                       ")
+    print("\t        .:+*###+-..:-=+*+*===:                    ")
+    print("\t      .-+##%*-.        ..#++*:                    ")
+    print("\t.:::=+###%#:.            .:..                     ")
+    print("\t++--=+*#%+.                                       ")
+    print("\t.:=++===#:                                        ")
+    print("\t++++*#%%%*")
+
+
+def print_wooden_sword():
+    print("             ..::.                            ")    
+    print("             =%#%%+=:.                          ")  
+    print("             =#####%%#=.                          ")
+    print("             :#######%%#.                         ")
+    print("              .########%#:                        ")
+    print("               .+#######%%=.                      ")
+    print("                .=%#######%*..-=+*=.              ")
+    print("                  -#######%%%####%%*.             ")
+    print("                ..:=%##############*-             ")
+    print("               :###########%%#=--..               ")
+    print("                .*###*+==@%%%%+..                 ")
+    print("                 .:..    .#%%%%#.                 ")
+    print("                          .+%%%%%+:               ")
+    print("                            -%###%+               ")
+    print("                             .---.                  ")   
+
+
+def print_monster():
+    print()
+    print("     .:::::...:=+*#%%@@@@@@@@%%#*+=:...:::::.     ")
+    print("    +@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%*.   ")
+    print("    :@@@@@@@@@@+==%@@@@@@@@@@%==+%@@@@@@@@@@@@.   ")
+    print("    :%@@@@@@@@%=-=#@@@@@@@@@@%=-=%@@@@@@@@@@@+    ")
+    print("  .+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@+.  ")
+    print(" .#@@*-. *@@@@@@@@@@@#-... .-%@@@@@@@@@@%-:=%@@#. ")
+    print(" *@@=    .%@@@@@@@@*:        .=@@@@@@@%=.   .%@@* ")
+    print(".@@@:     :@@@@@@+.            .+@@@@=.      +@@@.")
+    print(".@@@=      =@@%=.                .*+.        #@@@:")
+    print(" %@@@.      +:                              =@@@%.")
+    print(" :@@@@-                 :-.               .+@@@@- ")
+    print("  :%@@@#:             .*@@%+.           .=%@@@@-  ")
+    print("   .+@@@@%+:        .+@@@@@@@#-.     .-*@@@@@*.   ")
+    print("     .+%@@@@%*=-. .=%@@@@@@@@@@%+:-+#@@@@@%+.     ")
+    print("        %@@@@@@@@@%@@@@@@@@@@@@@@@@@@@@@@@.       ")
+    print("  .::.:-@@@--=*#@@@@@@@@@@@@@@@@@@#*+--@@@#*****- ")
+    print(" =@@@@@@%#-      .::--=======-::.      .-=+*****= ")
+
+
+def print_game_over():
+    print("  ____                         ___                 _ ")
+    print(" / ___| __ _ _ __ ___   ___   / _ \__   _____ _ __| |")
+    print("| |  _ / _` | '_ ` _ \ / _ \ | | | \ \ / / _ \ '__| |")
+    print("| |_| | (_| | | | | | |  __/ | |_| |\ V /  __/ |  |_|")
+    print(" \____|\__,_|_| |_| |_|\___|  \___/  \_/ \___|_|  (_)")
+
+
+def print_game_won():
+    print("  ____                       __        __          _ ")
+    print(" / ___| __ _ _ __ ___   ___  \ \      / /__  _ __ | |")
+    print("| |  _ / _` | '_ ` _ \ / _ \  \ \ /\ / / _ \| '_ \| |")
+    print("| |_| | (_| | | | | | |  __/   \ V  V / (_) | | | |_|")
+    print(" \____|\__,_|_| |_| |_|\___|    \_/\_/ \___/|_| |_(_)")
+
+
+def print_actions():
+    """Print the possible actions on screen."""
+    print('\n> You can perfom the following actions:-')
+    print('\t Look')
+    print('\t go <direction> e.g. go north')
+    print('\t get <item>')
+    print('\t view inventory')
+
+
+def describe_room(roomName):
+    """Print room description"""
+    print(f"\n> You entered the {rooms[roomName]['type']}")
+    print(rooms[roomName]['description'])
+
+
+def getNextRoom(direction, room):
+    """Get the next room based on the direction user chose to move."""
+    nextRoom = None
+    try:
+        if direction in rooms[room]['exits'].keys():
+            nextRoom = rooms[room]['exits'][direction]
+    except:
+        pass
+    return nextRoom
+
+
+def get_hero_name():
+    """Get the hero name"""
+    hero_name = input("\n> What is your name? ")
+    return hero_name
+
+
+def print_game_description():
+    """To print the game description"""
+
+    print('\n> One odd day you suddenly finds yourself in a old spooky haunted house.')
+    print('> You are being told that there is a furious monster inside it and you have to kill him to be free.')
+    print('> You heard the sound of bats. You heard the people saying Please save us from this monster.')
+
+
+def search_for_items(room):
+    """To search for items in a room."""
+    return rooms[room]['item']
+
+
+def get_item_description(item):
+    """To get each item's description"""
+    if item == 'entrynote':
+        print('\nYou found a anonymous note lying on the floor.')
+        itemdesc = '\nThe note reads: Welcome to the Adventure! I challenge you to escape the haunted house. You will find items in each room if you look around carefully. They might help you in killing the monster and possibly escaping. Good Luck pal.'
+    if item == 'sword':
+        print('\nVoila. You found the magical sword. I couldn\'t believe my eyes')
+        itemdesc = '\nOh my gosh! You just found the most prestigious royal magical sword that can kill the monster easily. Go kill the monster with your shiny royal sword.'
+    if item == 'shield':
+        itemdesc = '\nYou found a wooden shield. It might save you from a monster attack so use it wisely.'
+    if item == 'woodensword':
+        itemdesc = '\nYou found a wooden sword. You won\'t be able to kill the monster with it. But, you can still keep it as a sovenier if you make it to the end.'
+    return itemdesc
+
+
+def main():
+    # Clear the screen
+    os.system('clear')
+    
+    # Take user's name from the input
+    hero_name = get_hero_name()
+    print(f'\nWelcome {hero_name}, \nYou are about to play the Fight the monster text-based adventure game.')
+    
+    choice = ''
+    while choice not in VALID_CHOICES:
+        choice = input('\nAre you ready to play the game?(y|n) ')
+        if choice not in VALID_CHOICES:
+            print('Please enter a valid input.')
+    
+    # If the user is not ready to play exit the game.
+    if choice.lower() == 'n':
+        print('Alright. Come back soon. We will miss you pal. I thought we found our saviour who will save us from the mighty Monster.')
+        exit(0)
+
+    # Print game's description
+    print_game_description()
+
+    # Initial variables
+    monster_killed = False
+    player_died = False
+    action = 1
+
+    # Setup initial/starting room
+    currentRoom = "FLOYER"
+    roomsList = list(rooms.keys())
+
+    # Randomly put the monster in one of the 4 rooms except the starting room and backend(end)
+    monsterLocation = random.randint(1, len(roomsList)-2)
+    monsterRoom = roomsList[monsterLocation]
+
+    item = None
+    describe_room(currentRoom)
+
+    while not monster_killed and not player_died and currentRoom!= 'BACKYARD':
+
+        # If the player and the monster in the same room
+        if currentRoom == monsterRoom:
+            print_monster()
+            print(f'\nOh no, the monster is here in the {currentRoom}!')
+            if INVENTORY:
+                if 'sword' in INVENTORY:
+                    print_magic_sword()
+                    print('\n> You have the magical sword. You use it and cut the monster into pieces. This was a easiest win I have every seen. Good Job.')
+                    print('\n> You scored was 100% congratulations.')
+                    print_game_won()
+                    monster_killed = True
+                    break
+                if 'shield' in INVENTORY:
+                    print_shield()
+                    print('\n> You used the shield to defend against the monsters attack. The shield broke and the monster ate you. Good try.')
+                    print('\n> You scored was 75% congratulations. But, you couldn\'t kill the monster.')
+                    print_game_over()
+                if 'woodensword' in INVENTORY:
+                    print_wooden_sword()
+                    print('\n> You have the wooden sword. You used it to kill the monster but it\'s enough to kill the mighty monster and your sword broke. The monster ate you.')
+                    print('\n> You scored was 50% as you could\'t kill the monster.')
+                    print_game_over()
+            else:
+                print('\n> You scored was 10% for taking a fight with the monster but as you could\'t kill the monster.')
+                print_game_over()
+            player_died = True
+        else:
+            print_actions()
+            c = input('\n> What do you wanna do? ')
+            mode = 'a' if os.path.exists('actions.log') else 'w'
+
+            # To create a file actions.log to save user actions.
+            with open("actions.log", mode) as file:
+                if c.lower().startswith('go'):
+                    _, direction = c.split()
+                    file.write(f"Action {action}: move {direction}\n")
+                    action += 1
+                    nextRoom = getNextRoom(direction, currentRoom)
+                    if nextRoom:
+                        currentRoom = nextRoom
+                        describe_room(currentRoom)
+                    else:
+                        print('You bumped into the wall. Try going to another direction.')
+                elif c.lower() == 'look':
+                    file.write(f"Action {action}: Looking for an item\n")
+                    action += 1
+                    item = search_for_items(currentRoom)
+                    itemDescription = get_item_description(item)
+                    print(itemDescription)
+                    print('\nPlease run the command get <item> to add it to your inventory.')
+                elif c.lower().startswith('get'):
+                    file.write(f"Action {action}: pick {item}\n")
+                    action += 1
+                    if not item:
+                        print('You haven\'t found any item. Please run Look to look for items in the room')
+                    else:
+                        print(f'\n> {item} added to your inventory.')
+                        INVENTORY.append(item)
+                elif c.lower() == 'view inventory':
+                    if not INVENTORY:
+                        print('Your inventory is empty.')
+                    else:
+                        items = ', '.join(INVENTORY)
+                        print(f'You have the following items in your inventory: {items}')
+                else:
+                    print('I don\'t recognise that action. Please enter a valid action to continue.')
+
+    if currentRoom == 'BACKYARD':
+        print('\n> You escaped but you scored a zero for not taking a fight with the monster.')
+
+
+if __name__ == "__main__":
+    main()
+
+
